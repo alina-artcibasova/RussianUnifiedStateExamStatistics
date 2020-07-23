@@ -13,7 +13,8 @@ library("readxl")
 #install.packages("plyr")
 library("plyr")
 
-
+library(RColorBrewer)
+#ownPalette = brewer.pal(2, 'Set1')
 
 
 
@@ -36,9 +37,17 @@ subjects <- c('Russian', 'Math',
               'French', 'Spanish',
               'Sociology', 'Literature')
 
+passingGrade <- c(37, 21,
+                  31, 33,
+                  36, 35,
+                  30, 34,
+                  20, 20,
+                  20, 20,
+                  39, 30)
+
 # reading from file
-for(i in 1:14){
-  data_temp <- read_excel(file.path('data', 'tabl_perev_23.0.xls'), sheet = i, skip=4)
+for(i in 1:length(subjects)){
+  data_temp <- read_excel(file.path('data', 'tablica_perevodov_23.06.09.xls'), sheet = i, skip=4)
   data_temp$subject <- subjects[i]
   data_temp <- data_temp[-dim(data_temp)[1],]
   data <- rbind(data, data_temp)
@@ -49,52 +58,33 @@ colnames(data) <- c('primary', 'secondary', 'people', 'percent', 'integral', 'su
 rm(data_temp)
 
 #creating categories
-data$category <- ""
-data[data$subject == "Russian" |
-       data$subject == "Math",]$category <- 'Obligatory'
+data$passing <- TRUE
 
-data[data$subject == "English" |
-       data$subject == "German" |
-       data$subject == "French" |
-       data$subject == "Spanish",]$category <- 'Foreign Languages'
+for (i in 1:length(subjects)){
+  data[data$subject == subjects[i],]$passing <- data[data$subject == subjects[i],]$secondary >= passingGrade[i] 
+}
 
-data[data$subject == "Physics" |
-       data$subject == "Chemistry" |
-       data$subject == "Biology" |
-       data$subject == "CompSci"|
-       data$subject == "Geography",]$category <- 'Natural Sciences'
-
-data[data$subject == "History" |
-       data$subject == "Sociology" |
-       data$subject == "Literature",]$category <- 'Social Sciences'
-
-
-
+data$passing2 <- ''
+data[data$passing == TRUE,]$passing2 <- 'passed'
+data[data$passing == FALSE,]$passing2 <- 'failed'
 
 
 ##### plotting primary to secondary #####
 
-plotdots<- ggplot(data, aes(x=primary, y=secondary)) +
+plotdots<- ggplot(data, aes(x=primary, y=secondary, col=passing2)) +
   geom_point() +
   scale_y_continuous(breaks=c(20,40,60,80,100)) +
   ggtitle("Primary to secondary grade conversion for Russian State Exam 2009")+
   xlab("Primary Grade")+
   ylab("Secondary Grade (0-100)")+
-  facet_wrap( ~ subject, ncol=4)
-
-pdf(file='ExamResults2009.pdf', paper ='USr', width=11.69, height=8.27)
-print(plotdots +
-        theme_half_open() +
-        background_grid() +
-        theme())
-
-dev.off()
+  facet_wrap( ~ subject, ncol=4) +
+  scale_color_brewer(palette = "Set1")
 
 png(file='ExamResults2009.png', width=800, height=600)
 print(plotdots +
         theme_half_open() +
         background_grid() +
-        theme())
+        theme(legend.title=element_blank()))
 dev.off()
 
 
@@ -102,27 +92,21 @@ dev.off()
 
 
 ##### plotting participants distribution #####
-plots <- ggplot(data, aes(x=secondary, y=percent))+
+plots <- ggplot(data, aes(x=secondary, y=percent, col=passing2))+
   geom_point()+
   geom_line()+
   facet_wrap( ~ subject, ncol=4) +
   xlab("Secondary Grade (0-100)")+
   ylab("Participants (%)")+ 
-  ggtitle("Distribution of grades for Russian State Exam 2009 (23.06.09)")
+  ggtitle("Distribution of grades for Russian State Exam 2009 (23.06.09)") +
+  scale_color_brewer(palette = "Set1")
 
-#outputting data into files
-pdf(file='ExamDistribution2009.pdf', paper ='USr', width=11.69, height=8.27)
-plots +
-  theme_half_open() +
-  background_grid() +
-  theme()
-dev.off()
-
+#outputting data into file
 png(file='ExamDistribution2009.png', width=800, height=600)
 plots +
   theme_half_open() +
   background_grid() +
-  theme()
+  theme(legend.title=element_blank())
 dev.off()
 
 
@@ -130,7 +114,7 @@ dev.off()
 
 
 ##### plotting number of participants for each subject #####
-participantSummary <- ddply(data, .(subject), 
+participantSummary <- ddply(data, .(subject, passing2), 
                             summarize, 
                             numbers = sum(people))
 
@@ -138,25 +122,21 @@ participantSummary$subject <- factor(participantSummary$subject,
                                      levels = participantSummary$subject[order(-participantSummary$numbers)])
 
 #plotting summary
-plotSummary <- ggplot(participantSummary, aes(x=subject, y=numbers))+
+plotSummary <- ggplot(participantSummary, aes(x=subject, y=numbers, fill=passing2))+
   geom_col()+
   ggtitle("Numbers of participants for different subjects in Russian State Exam 2009 (23.06.09)")+
   ylab("Number of people")+ 
-  theme(axis.title.x = element_blank())
+  theme(axis.title.x = element_blank(),
+        legend.title=element_blank()) +
+  scale_fill_brewer(palette = "Set1")
 
 #outputting data into files
-pdf(file='ExamSubjectSummary2009.pdf', paper ='USr', width=11.69, height=8.27)
-plotSummary +
-    theme_half_open() +
-    background_grid() +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-          axis.title.x = element_blank())
-dev.off()
   
 png(file='ExamSubjectSummary2009.png', width=800, height=600)
 plotSummary +
     theme_half_open() +
     background_grid() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-          axis.title.x = element_blank())
+          axis.title.x = element_blank(),
+          legend.title=element_blank())
 dev.off()
