@@ -1,0 +1,4 @@
+.answers, .pbody table, .solution table, .pbody td, .solution td{font-family:'Times New Roman', Times, serif;font-size:11pt;}
+.pbody, .solution{font-family:'Times New Roman', Times, serif;font-size:11pt;text-indent:25px;}
+.pbody table, .solution table{text-indent:0;}
+

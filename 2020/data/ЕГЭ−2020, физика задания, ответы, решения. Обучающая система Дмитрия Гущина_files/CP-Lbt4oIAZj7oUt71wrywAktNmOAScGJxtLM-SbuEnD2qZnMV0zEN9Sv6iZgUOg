@@ -1,0 +1,228 @@
+$(document).ready(function(){
+    $('.solution_canvas').each(function(ind, el){
+        var e = $(el);
+        e.find('img').one("load", function() {
+            var w = e.find('img').width();
+            var h = e.find('img').height();
+            var canvas = $('<div class="svg"></div>').attr('width', w).attr('height', h).width(w).height(h).appendTo(e);
+            canvas.data('svg', new Painter(canvas));
+        }).each(function() {
+          if(this.complete) $(this).load();
+        });
+    })
+
+})
+
+var Painter = function(div){
+    var t = this;
+    this.svg_div = div;
+    //load current img
+    var svg = div.svg({loadURL: '/sol_drawer?a=load&ajax=1&stat=' + div.closest('.solution_canvas').attr('data-stat') + '&sol=' + div.closest('.solution_canvas').attr('data-sol'), onLoad: function(s){t.init_svg(s)}});
+    this.div = div.parent();
+    if (div.closest('.solution_canvas').attr('data-pupil') == '1') {
+        this.pupil = true;
+        return;
+    } else {
+        this.pupil = false;
+    }
+    this.width = parseInt(div.attr('width'));
+    this.height = parseInt(div.attr('height'));
+    this.draw_buttons();
+    this.states = [];
+    div.mousedown(function(e){t.mousedown_handler(e, this)});
+    div.mouseup(function(e){t.mouseup_handler(e, this)});
+    div.mousemove(function(e){t.mousemove_handler(e, this)});
+    this.undo_list = [];
+    this.redo_list = [];
+    this.tool = 'line';
+    t.clicks = [];
+    this.preview = [];
+}
+
+Painter.prototype.init_svg = function(svg){
+    this.svg = svg;
+}
+Painter.prototype.draw_buttons = function(){
+    var t = this;
+    var line = $('<span data-tool="line" class="draw_icon" style="color: red;margin: 5px 0 0;"><span style="transform: rotate(90deg);display: block;margin-left: 2px;margin-top: 2px;">|</span></span>').appendTo(this.div);
+    var dline = $('<span data-tool="dline" class="draw_icon" style="color: red;top:20px;font-family: Icons;margin: 5px 0 0;line-height: 18px;"><span style="transform: rotate(90deg);display: block;">&#xf7a5;</span></span>').appendTo(this.div);
+    var arr = $('<span data-tool="arr" class="draw_icon" style="color: red;top:40px;font-family: Icons;margin: 5px 0 0;line-height: 18px;"><span style="transform: rotate(45deg);display: block;">&#xf30c;</span></span>').appendTo(this.div);
+    var rect = $('<span data-tool="rect" class="draw_icon" style="color: red;top:60px;font-family: Icons_reg;margin: 5px 0 0;line-height: 18px;">&#xf0c8;</span>').appendTo(this.div);
+    var que = $('<span data-tool="que" class="draw_icon" style="color: red;top:80px;font-family: Icons;margin: 5px 0 0;line-height: 18px;">&#xf128;</span>').appendTo(this.div);
+    var undo = $('<span data-action="undo" class="draw_icon" style="top:100px;font-family: Icons;margin: 5px 0 0;line-height: 18px;">&#xf0e2;</span>').appendTo(this.div);
+    var redo = $('<span data-action="redo" class="draw_icon" style="top:120px;font-family: Icons;margin: 5px 0 0;line-height: 18px;">&#xf01e;</span>').appendTo(this.div);
+    this.save_icon = $('<div class="draw_icon disk_save saved" style="top:140px;"></div>').appendTo(this.div);
+    this.div.find('.draw_icon').click(function(){
+        var el = $(this);
+        if (el.attr('data-tool')) {
+            t.div.find('.draw_icon').removeClass('active');
+            el.addClass('active');
+            t.tool = el.attr('data-tool');
+            t.clicks = [];
+        } else {
+            if (el.attr('data-action') == 'undo') {
+                t.undo();
+            } else {
+                t.redo();
+            }
+        }
+        
+    
+    });
+}
+
+Painter.prototype.undo = function(){
+    if (!this.undo_list.length) return;
+    var now = this.svg_div.find('svg').children().clone();
+    var last = this.undo_list.pop();
+    this.svg.clear().add(last);
+    this.redo_list.push(now);
+    this.save();
+    
+}
+Painter.prototype.redo = function(){
+    if (!this.redo_list.length) return;
+    var now = this.svg_div.find('svg').children().clone();
+    var next = this.redo_list.pop();
+    this.svg.clear().add(next);
+    this.undo_list.push(now);
+    this.save();
+    
+}
+Painter.prototype.mousedown_handler = function(e, canvas){
+        this.clicks = [];
+        var x;
+        var y;
+        var posX = $(canvas).offset().left, posY = $(canvas).offset().top;
+        x=(e.pageX - posX);
+        y=(e.pageY - posY);
+        this.clicks.push([x,y]);
+}
+
+Painter.prototype.mousemove_handler = function(e, canvas){
+        if (this.clicks.length != 1) return;
+        var x;
+        var y;
+        var posX = $(canvas).offset().left, posY = $(canvas).offset().top;
+        x2=(e.pageX - posX);
+        y2=(e.pageY - posY);
+        this.clean_preview();
+            if (this.tool == 'line'){
+                this.preview = this.draw_line(this.clicks[0][0], this.clicks[0][1], x2, y2);
+            }
+            if (this.tool == 'dline'){
+                this.preview = this.draw_dline(this.clicks[0][0], this.clicks[0][1], x2, y2);
+            }
+        
+            if (this.tool == 'arr'){
+                this.preview = this.draw_arr(this.clicks[0][0], this.clicks[0][1], x2, y2);
+            }
+        
+            if (this.tool == 'rect'){
+                this.preview = this.draw_rect(this.clicks[0][0], this.clicks[0][1], x2, y2);
+            }
+            if (this.tool == 'que'){
+                this.preview = this.draw_que(this.clicks[0][0], this.clicks[0][1], x2, y2);
+            }
+}
+
+Painter.prototype.mouseup_handler = function(e, canvas){
+        var x;
+        var y;
+        var posX = $(canvas).offset().left, posY = $(canvas).offset().top;
+        x=(e.pageX - posX);
+        y=(e.pageY - posY);
+        this.clicks.push([x,y]);
+        this.clean_preview();
+        if (this.clicks.length >= 2){
+            this.undo_list.push(this.svg_div.find('svg').children().clone());
+            this.redo_list = [];
+            if (this.tool == 'line' && this.clicks.length >= 2){
+                this.draw_line(this.clicks[0][0], this.clicks[0][1], this.clicks[1][0], this.clicks[1][1]);
+            }
+            if (this.tool == 'dline' && this.clicks.length >= 2){
+                this.draw_dline(this.clicks[0][0], this.clicks[0][1], this.clicks[1][0], this.clicks[1][1]);
+            }
+        
+            if (this.tool == 'arr' && this.clicks.length >= 2){
+                this.draw_arr(this.clicks[0][0], this.clicks[0][1], this.clicks[1][0], this.clicks[1][1]);
+            }
+        
+            if (this.tool == 'rect' && this.clicks.length >= 2){
+                this.draw_rect(this.clicks[0][0], this.clicks[0][1], this.clicks[1][0], this.clicks[1][1]);
+            }
+            if (this.tool == 'que' && this.clicks.length >= 2){
+                this.draw_que(this.clicks[0][0], this.clicks[0][1], this.clicks[1][0], this.clicks[1][1]);
+            }
+        }
+        this.save();
+        this.clicks = [];
+}
+  
+Painter.prototype.draw_line = function(x1,y1,x2,y2){
+    return [
+        this.svg.line(x1, y1, x2, y2, {stroke:'red', strokeWidth: 3})
+    ];
+}
+Painter.prototype.draw_dline = function(x1,y1,x2,y2){
+                var dx = x2 - x1;
+                var dy = y2 - y1;
+                var l = Math.sqrt(dx*dx + dy*dy);
+                dx = dx/l;
+                dy = dy/l;
+    return [
+        this.svg.line(x1+2*dy, y1-2*dx, x2+2*dy, y2-2*dx, {stroke:'red', strokeWidth: 2}),
+        this.svg.line(x1-2*dy, y1+2*dx, x2-2*dy, y2+2*dx, {stroke:'red', strokeWidth: 2}),
+    ];
+}
+Painter.prototype.draw_arr = function(x1,y1,x2,y2){
+                var dx = x2 - x1;
+                var dy = y2 - y1;
+                var l = Math.sqrt(dx*dx + dy*dy);
+                dx = dx/l;
+                dy = dy/l;
+                return [
+                    this.svg.line(x1, y1, x2, y2, {stroke:'red', strokeWidth: 3}),
+                    this.svg.line(x2, y2, x2 - dx*15 + dy*5, y2 - dy*15 - dx*5,  {stroke:'red', strokeWidth: 3}),
+                    this.svg.line(x2, y2, x2 - dx*15 - dy*5, y2 - dy*15 + dx*5,  {stroke:'red', strokeWidth: 3})
+                ]
+}        
+
+Painter.prototype.draw_rect = function(x1,y1,x2,y2){
+                return [this.svg.rect(
+                    Math.min(x1, x2),
+                    Math.min(y1, y2),
+                    Math.abs(x2 - x1),
+                    Math.abs(y2 - y1),
+                    {stroke:'red', strokeWidth: 3, fill:'none'}
+                )];
+}        
+
+Painter.prototype.draw_que = function(x1,y1,x2,y2){
+                return [
+                
+                    this.svg.text(x2, y2, "?", {'fill':'red', "font-size":40, "font-family":"Verdana"})
+                ];
+}  
+
+
+Painter.prototype.clean_preview = function(){
+    for (var i = 0; i < this.preview.length; i++){
+        this.preview[i].remove();
+    }
+    this.preview = [];
+}
+
+Painter.prototype.save = function(){
+    var t = this;
+    this.save_icon.removeClass('saved');
+    var svg = this.svg.toSVG();
+    $.post('/sol_drawer?a=save&ajax=1', {stat:this.div.closest('.solution_canvas').attr('data-stat'), sol:this.div.closest('.solution_canvas').attr('data-sol'), 'svg':svg}, function(resp){if (resp.status == 0) t.saved()}, 'json')
+
+}
+Painter.prototype.saved = function(){
+    this.save_icon.addClass('saved');
+   
+}
+
+

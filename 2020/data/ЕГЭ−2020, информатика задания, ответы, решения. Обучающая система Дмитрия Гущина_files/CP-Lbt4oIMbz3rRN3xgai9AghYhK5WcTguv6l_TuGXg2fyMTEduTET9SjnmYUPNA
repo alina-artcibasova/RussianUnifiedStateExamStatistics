@@ -1,0 +1,219 @@
+var css = document.createElement("style");
+css.type = "text/css";
+css.innerHTML = "\
+.pred, .pred:hover, .pred_v:hover, .pred_v, .pred_0, .pred_no{\
+    padding: 5px 10px 5px 10px;\
+    width: calc(14.28% - 21px);\
+    max-width: none;\
+    min-width: auto;\
+}\
+            .topmenu_dd {\
+                margin:0;\
+                padding:0;\
+                height:24px;\
+                overflow:visible;\
+                display:inline-block;\
+                width: 14.28%;\
+                float:left;\
+            }\
+            .topmenu_dd .pred, .topmenu_dd .pred:hover {\
+                width: calc(100% - 21px);\
+            }\
+            .topmenu_dd_c {\
+                margin:0;\
+                padding:0;\
+                display:none;\
+                z-index:100;\
+                position:absolute;\
+                width:142px;\
+                background-color:rgba(255,255,255,0.01);\
+            }\
+            .topmenu_dd:hover .topmenu_dd_c{\
+                display:block;\
+            }\
+            .topmenu_dd:hover .topmenu_dd_h{\
+                display:none;\
+            }\
+.wrapper {\
+    max-width: 1000px;\
+    margin: auto;\
+    position: relative;\
+}\
+.page_header {\
+    margin:0;\
+    padding:0;\
+    position:relative;\
+}\
+.sdamgia_link {\
+    display:block;\
+    position:absolute;\
+    right:35%;\
+    bottom:5px;\
+    width:auto;\
+    font-size:15px;\
+}\
+.sdamgia_btns {\
+    display:none;\
+    margin:0;\
+    padding:0;\
+}\
+.sdamgia_btns a {\
+    display:inline-block;\
+    cursor: pointer;\
+    text-align: center;\
+    font-size: 12px;\
+    background: linear-gradient(#FFF0E6,#FFD2B6);\
+    padding: 2px;\
+    margin: 2px;\
+    width: calc(20% - 8px);\
+    text-decoration:none;\
+    color:black;\
+    border-radius: 2px;\
+}\
+.subj_nav {}\
+.pred_pan {\
+    width:auto;\
+    height:auto;\
+    min-height:auto;\
+    min-width:auto;\
+}\
+.pred_btn {\
+    display: none;\
+    cursor: pointer;\
+    text-align: center;\
+    font-size: 16px;\
+    background: linear-gradient(#FFF0E6,#FFD2B6);\
+    clear: both;\
+}\
+@media screen and (max-width: 830px) {\
+    .pred, .pred:hover, .pred_v:hover, .pred_v, .pred_0, .pred_no {\
+        width: 100px;\
+    }\
+   .topmenu_dd {\
+        width: 122px;\
+    }\
+}\
+@media screen and (max-width: 610px) {\
+    .pred, .pred_v, .pred_0, .pred_no, .topmenu_dd, .pred:hover, .pred_v:hover{\
+        width: calc(25% - 22px);\
+    }\
+   .topmenu_dd {\
+        width: 25%;\
+    }\
+   .topmenu_dd_c {\
+        width: calc(100% - 22px);\
+    }\
+    .pred_pan {\
+        display:none;\
+    }\
+    .pred_btn {\
+        display:block;\
+    }\
+     .topmenu_dd {\
+        height: auto;\
+        width: 100%;\
+        margin: 0 0 0 0;\
+    }\
+     .topmenu_dd_c {\
+         display: block;\
+         position: relative;\
+        width: 100%;\
+     }\
+    .topmenu_dd_c .pred {\
+         display: block;\
+    }\
+}\
+@media screen and (max-width: 580px) {\
+    .pred, .pred_v, .pred_0, .pred_no, .topmenu_dd, .pred:hover, .pred_v:hover{\
+        width: calc(33.3% - 22px);\
+        height:20px;\
+        line-height:20px;\
+        font-size:14px;\
+    }\
+   .topmenu_dd {\
+        width: 33.3%;\
+        height: auto;\
+    }\
+}\
+@media screen and (max-width: 430px) {\
+    .pred, .pred_v, .pred_0, .pred_no, .topmenu_dd, .pred:hover, .pred_v:hover{\
+        width: calc(50% - 22px);\
+    }\
+   .topmenu_dd {\
+        width: 50%;\
+        height: auto;\
+    }\
+}\
+@media screen and (max-width: 450px) {\
+    .wide_only {\
+        display:none;\
+    }\
+}\
+.oMCGd_Jq0osEQbDU {\
+    position:absolute;\
+    width: 160px;\
+    padding-right:5px;\
+    border-right:2px solid silver;\
+    clear:both;\
+}\
+.oLyOS6ei6rMQLLDipT87xwa8 {\
+    margin-left: 175px;\
+    margin-right: 5px;\
+}\
+.left_column_btn {\
+    display:none;\
+    cursor: pointer;\
+    text-align: center;\
+    font-size: 16px;\
+    background: linear-gradient(#FFF0E6,#FFD2B6);\
+    clear: both;\
+}\
+.footer {\
+    clear:both;\
+    margin-left: 175px;\
+    margin-right: 5px;\
+}\
+@media screen and (max-width: 750px){\
+    .oLyOS6ei6rMQLLDipT87xwa8 {\
+        margin-left: 10px;\
+        margin-right: 10px;\
+    }\
+    .footer {\
+        margin-left: 5px;\
+        margin-right: 5px;\
+    }\
+    .oMCGd_Jq0osEQbDU {\
+        display:none;\
+        width: calc(100% - 10px);\
+        position:relative;\
+        border:none;\
+        padding:5px;\
+    }\
+    .left_column_btn {\
+        display:block;\
+    }\
+    .sdamgia_link {\
+        display:none;\
+    }\
+    .sdamgia_btns {\
+        display:block;\
+    }\
+    .menu a {\
+        width: 50%;\
+        box-sizing: border-box;\
+        display: inline-block;\
+        margin: 0;\
+    }\
+    .menu {\
+        font-size: 0;\
+    }\
+    .menu_l {\
+        font-size: 14px;\
+    }\
+}\
+.adblock_notify{\
+    display:none\
+}\
+.mh {min-height:90px}\
+.counters {}";
+document.head.appendChild(css);

@@ -1,0 +1,56 @@
+expandable = function(){
+    $('.expand').each(function(ind,el){
+        var e = $(el);
+        if (e.data('exp_inited') == 1) {
+            return;
+        } else {
+            e.data('exp_inited', 1);
+        }
+        if (e.hasClass('link-after')){
+            $('<a href="javascript:void()" class="adashed"></a>').text(e.attr('data-open')).click(function(){
+                var div = $(this).prev();
+                if (div.is(':visible')){
+                    div.slideUp();
+                    $(this).text(div.attr('data-open'));
+                } else {
+                    div.slideDown();
+                    $(this).text(div.attr('data-close'));
+                }
+            }).insertAfter(e);
+        } else if (e.hasClass('link-both')) {
+            var ab = $('<a href="javascript:void()" class="adashed"></a>').text(e.is(':visible')?e.attr('data-close'):e.attr('data-open')).data('div', e).insertBefore(e);
+            var aa = $('<a href="javascript:void()" class="adashed"></a>').text(e.is(':visible')?e.attr('data-close'):e.attr('data-open')).data('div', e).insertAfter(e);
+            if (!e.is(':visible')){
+                aa.hide();
+            }
+            e.data('aa', aa).data('ab', ab);
+            var handler = function(){
+                var div = $(this).data('div');
+                if (div.is(':visible')){
+                    div.slideUp();
+                    div.data('aa').text(div.attr('data-open')).hide();
+                    div.data('ab').text(div.attr('data-open'));
+                } else {
+                    div.slideDown();
+                    div.data('aa').text(div.attr('data-close')).show();
+                    div.data('ab').text(div.attr('data-close'));
+                }
+            };
+           aa.click(handler);
+           ab.click(handler);
+        } else {
+            $('<a href="javascript:void()" class="adashed"></a>').text(e.is(':visible')?e.attr('data-close'):e.attr('data-open')).click(function(){
+                var div = $(this).next();
+                if (div.is(':visible')){
+                    div.slideUp();
+                    $(this).text(div.attr('data-open'));
+                } else {
+                    div.slideDown();
+                    $(this).text(div.attr('data-close'));
+                }
+            }).insertBefore(e);
+        }
+    });
+}
+$(document).ready(expandable);
+
