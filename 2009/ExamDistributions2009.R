@@ -1,20 +1,13 @@
-#install.packages("rstudioapi")
 library("rstudioapi")
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-#install.packages("ggplot2")
 library("ggplot2")
-#install.packages("cowplot")
 library("cowplot")
-#install.packages("ggrepel")
 library("ggrepel")
-#install.packages("readxl")
 library("readxl")
-#install.packages("plyr")
 library("plyr")
+library("RColorBrewer")
 
-library(RColorBrewer)
-#ownPalette = brewer.pal(2, 'Set1')
 
 
 
@@ -37,6 +30,7 @@ subjects <- c('Russian', 'Math',
               'French', 'Spanish',
               'Sociology', 'Literature')
 
+#creating a vector of passing grades
 passingGrade <- c(37, 21,
                   31, 33,
                   36, 35,
@@ -57,7 +51,7 @@ for(i in 1:length(subjects)){
 colnames(data) <- c('primary', 'secondary', 'people', 'percent', 'integral', 'subject')
 rm(data_temp)
 
-#creating categories
+#checking if the grade is passing or not
 data$passing <- TRUE
 
 for (i in 1:length(subjects)){
@@ -67,6 +61,9 @@ for (i in 1:length(subjects)){
 data$passing2 <- ''
 data[data$passing == TRUE,]$passing2 <- 'passed'
 data[data$passing == FALSE,]$passing2 <- 'failed'
+
+
+
 
 
 ##### plotting primary to secondary #####
@@ -80,7 +77,7 @@ plotdots<- ggplot(data, aes(x=primary, y=secondary, col=passing2)) +
   facet_wrap( ~ subject, ncol=4) +
   scale_color_brewer(palette = "Set1")
 
-png(file='ExamResults2009.png', width=800, height=600)
+png(file='PrimaryToSecondary2009.png', width=800, height=600)
 print(plotdots +
         theme_half_open() +
         background_grid() +
@@ -114,12 +111,28 @@ dev.off()
 
 
 ##### plotting number of participants for each subject #####
+#making a summary
 participantSummary <- ddply(data, .(subject, passing2), 
                             summarize, 
                             numbers = sum(people))
+#second summary for total numbers of people
+participantSummary2 <- ddply(data, .(subject), 
+                            summarize, 
+                            numbers = sum(people))
 
-participantSummary$subject <- factor(participantSummary$subject,
-                                     levels = participantSummary$subject[order(-participantSummary$numbers)])
+#separating summary into passing and failing
+participantSummaryPassed <- participantSummary[participantSummary$passing2 == 'passed',]
+participantSummaryFailed <- participantSummary[participantSummary$passing2 == 'failed',]
+
+#ordering both by the total number of people who took the exam
+participantSummaryPassed$subject <- factor(participantSummaryPassed$subject,
+                                     levels = participantSummaryPassed$subject[order(-participantSummary2$numbers)])
+participantSummaryFailed$subject <- factor(participantSummaryFailed$subject,
+                                           levels = participantSummaryFailed$subject[order(-participantSummary2$numbers)])
+#combining them back together
+participantSummary <- rbind(participantSummaryPassed, participantSummaryFailed)
+
+rm(participantSummary2, participantSummaryPassed, participantSummaryFailed)
 
 #plotting summary
 plotSummary <- ggplot(participantSummary, aes(x=subject, y=numbers, fill=passing2))+

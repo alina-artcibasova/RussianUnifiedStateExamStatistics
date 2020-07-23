@@ -1,0 +1,3 @@
+Data copied from https://4ege.ru/filesup/ball.html#raz1, using the order/labels listed here: https://4ege.ru/novosti-ege/699-shkala-perevoda-ballov-egye-2011.html, because the original document encoding somehow got corrupted
+
+Данные скачаны с https://4ege.ru/filesup/ball.html#raz1, предметы обозначены используя порядок указанный на https://4ege.ru/novosti-ege/699-shkala-perevoda-ballov-egye-2011.html, так как кодировка оригинального файла помялась.
