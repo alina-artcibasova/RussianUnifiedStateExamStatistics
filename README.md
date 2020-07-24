@@ -1,2 +1,4 @@
 # RusStateExam
- Stats for Russian State Exam (ЕГЭ)
+ Stats for Russian Unified State Exam
+ 
+ Статистика результатов Российского Единого Государственного Экзамена (ЕГЭ) по годам
