@@ -49,6 +49,17 @@ data[data$secondary == 82 & data$subject == 'Russian',]$tributesRus <- 'Dmitriy'
 data$tributesMath <- ''
 data[data$secondary == 90 & data$subject == 'Math',]$tributesMath <- 'Anton'
 data[data$secondary == 62 & data$subject == 'Math',]$tributesMath <- 'Angelica'
+data[data$secondary == 76 & data$subject == 'Math',]$tributesMath <- 'Ksenia'
+data[data$secondary == 50 & data$subject == 'Math',]$tributesMath <- 'Artemiy, Michail'
+data[data$secondary == 72 & data$subject == 'Math',]$tributesMath <- 'Dmitriy'
+
+data$tributesPhysics <- ''
+data[data$secondary == 91 & data$subject == 'Physics',]$tributesPhysics <- 'Anton'
+data[data$secondary == 68 & data$subject == 'Physics',]$tributesPhysics <- 'Angelica'
+#data[data$secondary == 91 & data$subject == 'Physics',]$tributesPhysics <- 'Ksenia'
+#data[data$secondary == 68 & data$subject == 'Physics',]$tributesPhysics <- 'Artemiy'
+#data[data$secondary == 91 & data$subject == 'Physics',]$tributesPhysics <- 'Michail'
+#data[data$secondary == 68 & data$subject == 'Physics',]$tributesPhysics <- 'Dmitriy'
 
 
 ## plotting stuff
@@ -76,20 +87,19 @@ plotlabels<- ggplot(data, aes(x=primary, y=secondary)) +
                        size = 3.5,
                        label.padding = 0.5,
                        alpha = .4,
-                       force = 23)
+                       force = 23)+
+  geom_label_repel(aes(label=tributesPhysics,
+                       fill = subject),
+                   color = 'black',
+                   size = 3.5,
+                   label.padding = 0.5,
+                   alpha = .4,
+                   force = 23)
 
 plotdots<- ggplot(data, aes(x=primary, y=secondary)) +
   geom_point(aes(col=subject))+
   scale_y_continuous(breaks=c(20,40,60,80,100))+
   ggtitle("Primary to secondary grade conversion for Russian State Exam 2020")
-
-pdf(file='ExamResults2020.pdf', paper ='USr', width=11.69, height=8.27)
-print(plotdots +
-        theme_half_open() +
-        background_grid() +
-        theme())
-
-dev.off()
 
 png(file='ExamResults2020.png', width=800, height=600)
 print(plotdots +
@@ -98,7 +108,7 @@ print(plotdots +
         theme())
 dev.off()
 
-png(file='ExamResults2020labeled.png', width=800, height=600)
+png(file='ExamResults2020labeled.png', width=1000, height=800)
 print(plotlabels +
         theme_half_open() +
         background_grid() +
@@ -108,6 +118,12 @@ dev.off()
 
 #compsci
 nameBro <- 'Anton'
-sum(data[data$tributesCS == nameBro | data$tributesRus == nameBro | data$tributesMath == nameBro,]$secondary) + 10
+sum(data[data$tributesCS == nameBro | data$tributesRus == nameBro | data$tributesMath == nameBro,]$secondary)
 nameSis <- 'Angelica'
-sum(data[data$tributesCS == nameSis | data$tributesRus == nameSis | data$tributesMath == nameSis,]$secondary) + 10
+sum(data[data$tributesCS == nameSis | data$tributesRus == nameSis | data$tributesMath == nameSis,]$secondary)
+
+#compsci
+nameBro <- 'Anton'
+sum(data[data$tributesPhysics == nameBro | data$tributesRus == nameBro | data$tributesMath == nameBro,]$secondary)
+nameSis <- 'Angelica'
+sum(data[data$tributesPhysics == nameSis | data$tributesRus == nameSis | data$tributesMath == nameSis,]$secondary)
